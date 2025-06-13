@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+{% load static %}
+
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Profile</title>
+    <link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}">
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+    <style>
+        body {
+            background-color: #121212;
+            color: #e0e0e0;
+            font-family: Arial, sans-serif;
+        }
+        .profile-card {
+            background-color: #1e1e1e;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+            max-width: 500px;
+            margin: 50px auto;
+        }
+        .profile-card h2 {
+            margin-bottom: 20px;
+            color: #bb86fc;
+        }
+        .profile-card p {
+            margin: 10px 0;
+            font-size: 1.1em;
+        }
+        .profile-card a {
+            text-decoration: none;
+        }
+        .btn-custom {
+            background-color: #bb86fc;
+            border: none;
+            color: #121212;
+        }
+        .btn-custom:hover {
+            background-color: #9f67d2;
+        }
+    </style>
+</head>
+<body>
+    <div class="profile-card text-center">
+        <h2><i class="fa-solid fa-user-circle"></i> Profile Details</h2>
+        <p><strong>Name:</strong> {{ user.get_full_name }}</p>
+        <p><strong>Email:</strong> {{ user.email }}</p>
+        <p><strong>Username:</strong> {{ user.username }}</p>
+        <!-- <p><strong>Username:</strong> {{ user.password }}</p> -->
+
+        <div class="d-flex justify-content-center gap-2">
+            <a href="{% url 'change_password' %}" class="btn btn-custom btn-block text-white">Change Password</a>
+ 
+        </div>
+    </div>
+</body>
+</html>
+
