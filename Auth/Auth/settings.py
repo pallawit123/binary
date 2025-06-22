@@ -143,3 +143,6 @@ EMAIL_HOST_USER = 'salibade1994@gmail.com'
 EMAIL_HOST_PASSWORD = 'put yours password'  
 
 
+
+
+OPENWEATHERMAP_API_KEY = 'c9085be2ba255f1ff15d56c7dfb6c9a9'

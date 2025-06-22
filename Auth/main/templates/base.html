@@ -37,7 +37,7 @@
                         <a class="nav-link" href="{% url 'listoffood' %}"><i class="fas fa-utensils"></i>  Foods & Drinks</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="#"><i class="far fa-calendar-alt"></i>  Events</a>
+                        <a class="nav-link" href="{% url 'events' %}"><i class="far fa-calendar-alt"></i>  Events</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="#"><i class="fa-regular fa-map"></i>  Tourism Services</a>
@@ -46,6 +46,9 @@
                         <a class="nav-link dropdown-toggle" href="#" id="blogsDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                             <i class="fa-solid fa-book-open"></i> Blogs
                         </a>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'weather' %}"><i class="fa-regular fa-map"></i>  Weather</a>
+                    </li>
                         <ul class="dropdown-menu" aria-labelledby="blogsDropdown">
                             <li><a class="dropdown-item" href="{% url 'community' %}">Share Experience</a></li>
                             <li><a class="dropdown-item" href="{% url 'contribution' %}">Contribute</a></li>

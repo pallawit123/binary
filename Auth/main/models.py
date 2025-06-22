@@ -124,3 +124,71 @@ class Sites(models.Model):
     def __str__(self):
         return self.name
     
+
+
+    #Events started at here#
+
+class Category(models.Model):
+    name = models.CharField(max_length=50, unique=True)
+    description = models.TextField(blank=True)
+    icon = models.CharField(max_length=100, blank=True)  # For category icon CSS class or image path
+
+    def __str__(self):
+        return self.name
+
+class Tag(models.Model):
+    name = models.CharField(max_length=30, unique=True)
+
+    def __str__(self):
+        return self.name
+
+class Event(models.Model):
+    STATUS_CHOICES = [
+        ('upcoming', 'Upcoming'),
+        ('ongoing', 'Ongoing'),
+        ('completed', 'Completed'),
+        ('cancelled', 'Cancelled'),
+    ]
+
+    EVENT_TYPE_CHOICES = [
+        ('festival', 'Festival'),
+        ('workshop', 'Workshop'),
+        ('exhibition', 'Exhibition'),
+        ('religious', 'Religious'),
+        ('cultural', 'Cultural'),
+        ('seasonal', 'Seasonal'),
+        ('music', 'Music'),
+        ('art', 'Art'),
+        ('food', 'Food'),
+        ('other', 'Other'),
+    ]
+
+    title = models.CharField(max_length=200)
+    description = models.TextField()
+    start_date = models.DateTimeField()
+    end_date = models.DateTimeField()
+    location = models.CharField(max_length=200)
+    image = models.ImageField(upload_to='events/', blank=True, null=True)
+    is_featured = models.BooleanField(default=False)
+    categories = models.ManyToManyField(Category, related_name='events')
+    tags = models.ManyToManyField(Tag, blank=True, related_name='events')
+    event_type = models.CharField(max_length=20, choices=EVENT_TYPE_CHOICES, default='other')
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='upcoming')
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    organizer = models.CharField(max_length=100, blank=True)
+    website = models.URLField(blank=True)
+
+    def __str__(self):
+        return self.title
+
+    class Meta:
+        ordering = ['-start_date']
+
+class EventGallery(models.Model):
+    event = models.ForeignKey(Event, on_delete=models.CASCADE, related_name='gallery')
+    image = models.ImageField(upload_to='events/gallery/')
+    caption = models.CharField(max_length=200, blank=True)
+
+    def __str__(self):
+        return f"Gallery image for {self.event.title}"

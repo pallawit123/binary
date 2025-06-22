@@ -36,5 +36,11 @@ urlpatterns = [
     path('sites/',listofsites,name='sites'),
     path('site_detail/<int:id>',site_detail,name='site_detail'),
     # sites ends here
-]
 
+
+     path('weather/', weather_view, name='weather'),
+
+
+
+     path('events/', events_view, name='events'),  # Use 'events' as the name
+]

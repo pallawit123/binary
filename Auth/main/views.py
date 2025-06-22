@@ -406,3 +406,100 @@ def site_detail(request, id):
         }
         
     return render(request, 'sites/site_detail.html', context)
+
+
+
+
+
+
+from .utils import get_weather_data  # use .utils if you rename the file
+
+import requests
+from collections import defaultdict
+from django.shortcuts import render
+
+def weather_view(request):
+    API_KEY = 'c9085be2ba255f1ff15d56c7dfb6c9a9'
+    city = request.GET.get('city', '').strip()
+    country = request.GET.get('country', '').strip().upper()
+
+    weather = None
+    forecast = []
+
+    if city:
+        # Build query for OpenWeatherMap
+        query = city
+        if country:
+            query += f",{country}"
+
+        # Fetch current weather
+        current_url = f'https://api.openweathermap.org/data/2.5/weather?q={query}&appid={API_KEY}&units=metric'
+        current_response = requests.get(current_url)
+        current_data = current_response.json()
+
+        if current_data.get('cod') == 200:
+            weather = {
+                'city': current_data['name'],
+                'temperature': round(current_data['main']['temp'], 1),
+                'description': current_data['weather'][0]['description'],
+                'humidity': current_data['main']['humidity'],
+                'wind': current_data['wind']['speed'],
+                'icon_url': f"http://openweathermap.org/img/wn/{current_data['weather'][0]['icon']}@2x.png"
+            }
+
+        # Fetch 5-day forecast
+        forecast_url = f'https://api.openweathermap.org/data/2.5/forecast?q={query}&appid={API_KEY}&units=metric'
+        forecast_response = requests.get(forecast_url)
+        forecast_data = forecast_response.json()
+
+        if forecast_data.get('cod') == '200':
+            daily_data = defaultdict(list)
+            for entry in forecast_data.get('list', []):
+                date = entry['dt_txt'].split(' ')[0]
+                daily_data[date].append(entry)
+
+            for date, entries in list(daily_data.items())[:5]:
+                temps = [e['main']['temp'] for e in entries]
+                descriptions = [e['weather'][0]['description'] for e in entries]
+                humidities = [e['main']['humidity'] for e in entries]
+                winds = [e['wind']['speed'] for e in entries]
+                icons = [e['weather'][0]['icon'] for e in entries]
+                forecast.append({
+                    'date': date,
+                    'avg_temp': round(sum(temps) / len(temps), 1),
+                    'description': descriptions[0],
+                    'humidity': round(sum(humidities) / len(humidities)),
+                    'wind': round(sum(winds) / len(winds), 1),
+                    'icon_url': f"http://openweathermap.org/img/wn/{icons[0]}@2x.png"
+                })
+
+    return render(request, 'main/weather.html', {
+        'weather': weather,
+        'forecast': forecast,
+        'city': city,
+        'country': country
+    })
+
+
+
+
+from django.shortcuts import render
+from .models import Event, Category, Tag
+
+def events_view(request):
+    events = Event.objects.all()
+    featured_events = events.filter(is_featured=True)[:3]
+    categories = Category.objects.all()
+    tags = Tag.objects.all()
+    return render(request, "event/events.html", {
+        "events": events,
+        "featured_events": featured_events,
+        "categories": categories,
+        "tags": tags,
+    })
+
+
+
+def events_page(request):
+    events = Event.objects.all()
+    return render(request, 'event/events.html', {'events': events})

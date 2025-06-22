@@ -1,0 +1,205 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<style>
+.weather-container {
+    background: #fff;
+    border-radius: 18px;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.10), 0 1.5px 6px rgba(0,0,0,0.07);
+    padding: 2.5rem 2rem;
+    min-width: 320px;
+    max-width: 350px;
+    margin: 0 auto;
+    transition: box-shadow 0.2s;
+}
+.weather-container:hover {
+    box-shadow: 0 8px 32px rgba(0,0,0,0.13), 0 3px 12px rgba(0,0,0,0.09);
+}
+.location {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #2a2a2a;
+    margin-bottom: 0.5rem;
+}
+.weather-icon img {
+    margin: 1rem 0;
+}
+.temperature {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: #0077ff;
+    margin-bottom: 0.5rem;
+}
+.description {
+    font-size: 1.1rem;
+    color: #555;
+    margin-bottom: 1.2rem;
+    text-transform: capitalize;
+}
+.details {
+    display: flex;
+    justify-content: space-between;
+    gap: 1.5rem;
+    margin-top: 1.2rem;
+}
+.detail-item {
+    background: #f5f7fa;
+    border-radius: 10px;
+    padding: 0.7rem 1rem;
+    flex: 1;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+}
+.detail-label {
+    font-size: 0.9rem;
+    color: #888;
+    margin-bottom: 0.2rem;
+}
+.detail-value {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #222;
+}
+.search-form {
+    margin-bottom: 1.5rem;
+    display: flex;
+    justify-content: center;
+    gap: 0.5rem;
+}
+.search-input {
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    font-size: 1rem;
+    width: 180px;
+}
+.search-btn {
+    padding: 0.5rem 1.2rem;
+    border-radius: 8px;
+    border: none;
+    background: #0077ff;
+    color: #fff;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+.search-btn:hover {
+    background: #005fcc;
+}
+
+.autocomplete-dropdown {
+    position: absolute;
+    background: #fff;
+    border: 1px solid #ccc;
+    width: 100%;
+    z-index: 1000;
+    max-height: 200px;
+    overflow-y: auto;
+    border-radius: 8px;
+}
+.autocomplete-dropdown div:hover {
+    background: #f0f0f0;
+}
+</style>
+<form class="search-form" method="get" autocomplete="off">
+    <input class="search-input" type="text" name="city" placeholder="Enter city" value="{{ city }}">
+    <input type="hidden" name="country" class="country-input" value="{{ country }}">
+    <button class="search-btn" type="submit">Search</button>
+</form>
+        {% if weather %}
+            <h3>Current Weather in {{ weather.city }}</h3>
+            <div class="weather-icon">
+                <img src="{{ weather.icon_url }}" alt="Weather icon" width="60" height="60">
+            </div>
+            <div class="temperature">{{ weather.temperature }}°C</div>
+            <div class="description">{{ weather.description }}</div>
+            <div class="details">
+                <div class="detail-item">
+                    <div class="detail-label">Humidity</div>
+                    <div class="detail-value">{{ weather.humidity }}%</div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-label">Wind</div>
+                    <div class="detail-value">{{ weather.wind }} m/s</div>
+                </div>
+            </div>
+            <hr>
+        {% endif %}
+        {% if forecast %}
+            <h3>5-Day Forecast for {{ city|title }}</h3>
+            <div>
+                {% for day in forecast %}
+                    <div style="margin-bottom: 1.5rem; border-bottom: 1px solid #eee; padding-bottom: 1rem;">
+                        <div class="location">{{ day.date }}</div>
+                        <div class="weather-icon">
+                            <img src="{{ day.icon_url }}" alt="Weather icon" width="60" height="60">
+                        </div>
+                        <div class="temperature">{{ day.avg_temp }}°C</div>
+                        <div class="description">{{ day.description }}</div>
+                        <div class="details">
+                            <div class="detail-item">
+                                <div class="detail-label">Humidity</div>
+                                <div class="detail-value">{{ day.humidity }}%</div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-label">Wind</div>
+                                <div class="detail-value">{{ day.wind }} m/s</div>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <p>No forecast data available.</p>
+        {% endif %}
+    </div>
+</div>
+<script>
+    const apiKey = "46f4ca4a232d4de59ef8c6683055ce00;"
+const input = document.querySelector('.search-input');
+const countryInput = document.querySelector('.country-input');
+let dropdown;
+
+input.addEventListener('input', function() {
+    const query = input.value;
+    if (query.length < 2) {
+        if (dropdown) dropdown.remove();
+        return;
+    }
+    fetch(`https://api.geoapify.com/v1/geocode/autocomplete?text=${encodeURIComponent(query)}&limit=5&apiKey=${apiKey}`)
+        .then(response => response.json())
+        .then(data => {
+            if (dropdown) dropdown.remove();
+            dropdown = document.createElement('div');
+            dropdown.className = 'autocomplete-dropdown';
+            const rect = input.getBoundingClientRect();
+            dropdown.style.left = input.offsetLeft + 'px';
+            dropdown.style.top = (input.offsetTop + input.offsetHeight) + 'px';
+            dropdown.style.width = input.offsetWidth + 'px';
+            data.features.forEach(place => {
+                const option = document.createElement('div');
+                option.textContent = place.properties.formatted;
+                option.style.padding = '8px';
+                option.style.cursor = 'pointer';
+                option.addEventListener('mousedown', function(e) {
+                    e.preventDefault();
+                    input.value = place.properties.city || place.properties.name || place.properties.formatted;
+                    countryInput.value = place.properties.country_code ? place.properties.country_code.toUpperCase() : '';
+                    dropdown.remove();
+                });
+                dropdown.appendChild(option);
+            });
+            input.parentNode.appendChild(dropdown);
+        });
+});
+{% endblock %}
+
+
+
+
+
+
+
+
+
+
